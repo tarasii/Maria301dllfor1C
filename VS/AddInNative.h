@@ -74,13 +74,11 @@ private:
 	bool wstring_to_p(std::wstring s, tVariant* val) ;
 
 	bool CMD(tVariant* pvarRetValue, tVariant* paParams, const long lSizeArray);
-
 	bool Test(tVariant* pvarRetValue, tVariant* paParams, const long lSizeArray) ;
 	
 	uint8_t send_data(void) ;
 	uint8_t OpenPort(void) ;
 	void ClosePort(void) ;
-	void return_modem_error(tVariant* pvarRetValue, int err_num) ;
 	uint8_t return_error(uint8_t err_no) ;
 	void write_log(char* OUTBUFFER, int l, char log_type) ;
 
@@ -90,23 +88,12 @@ private:
 
     uint8_t             m_port;
     uint8_t             m_err;
-    uint8_t             m_armo;
 	uint32_t            m_baud;
     bool                m_isOpen;
-    bool                m_isCheckOpen;
-	bool				m_sleep;
 	bool				m_loging;
 
-	std::wstring		m_usr;
-	std::wstring		m_pwd;
 	std::wstring		m_cmd;
-	std::wstring		m_dep;
 	std::wstring		m_ans;
-	std::wstring		m_fi_ver;
-
-	std::wstring		m_nlg[7];
-
-	std::wstring		m_s[20];
 
 };
 

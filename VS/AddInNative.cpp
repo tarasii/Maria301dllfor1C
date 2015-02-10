@@ -205,9 +205,7 @@ CAddInNative::~CAddInNative()
 bool CAddInNative::Init(void* pConnection)
 { 
     m_iConnect = (IAddInDefBase*)pConnection;
-	//test1 = NULL;
 	m_isOpen = false;
-	m_isCheckOpen = false;
 	m_loging = false;
     return m_iConnect != NULL;
 }
@@ -465,8 +463,6 @@ long CAddInNative::GetNParams(const long lMethodNum)
     { 
 	case eMethOpenPort:
         return 2;
-	case eMethClosePort:
-        return 1;
 	case eMethCMD:
         return 1;
 	default:
@@ -479,20 +475,11 @@ long CAddInNative::GetNParams(const long lMethodNum)
 bool CAddInNative::GetParamDefValue(const long lMethodNum, const long lParamNum,
                           tVariant *pvarParamDefValue)
 { 
-	time_t t = time(0);   // get time now
-    struct tm * now = localtime( & t );
 	
 	TV_VT(pvarParamDefValue)= VTYPE_EMPTY;
 
     switch(lMethodNum)
     { 
-    case eMethClosePort:
-		if (lParamNum == 0)
-		{
-			TV_VT(pvarParamDefValue) = VTYPE_UI1;
-			TV_UI1(pvarParamDefValue) = 1;
-			return true;
-		}
     case eMethOpenPort:
 		switch(lParamNum)
 		{
@@ -543,15 +530,10 @@ bool CAddInNative::HasRetVal(const long lMethodNum)
 bool CAddInNative::CallAsProc(const long lMethodNum,
                     tVariant* paParams, const long lSizeArray)
 { 
-	std::wstring p;
 	
-	m_sleep = false;
-
     switch(lMethodNum)
     { 
     case eMethClosePort:
-		if (!param_check(p, paParams, 1, 1)) return false;
-		m_sleep = (p.compare(L"0")!=0); 
 		CAddInNative::ClosePort();
         break;
 	case eMethLoging:
@@ -579,7 +561,6 @@ bool CAddInNative::CallAsFunc(const long lMethodNum,
 		res = 0;
 		if (!m_isOpen)
 		{ 
-			m_isCheckOpen = false;
 
 			m_port = TV_UI1(paParams);
 			m_baud = TV_UI4(paParams+1);
@@ -604,7 +585,7 @@ bool CAddInNative::CallAsFunc(const long lMethodNum,
 
 	}
 
-	if (!ret) ClosePort();
+	//if (!ret) ClosePort();
     return ret; 
 }
 //---------------------------------------------------------------------------//
@@ -1140,7 +1121,6 @@ uint8_t CAddInNative::OpenPort(void)
 void CAddInNative::ClosePort(void)
 {
 	//if (m_isCheckOpen) CAddInNative::CancelCheck(NULL,NULL,0);
-	//if (m_isOpen && m_sleep) {
 	if (m_isOpen) {
 		dcb.fDtrControl = DTR_CONTROL_DISABLE; 
 		if(!SetCommState(hComm, &dcb))
@@ -1148,7 +1128,6 @@ void CAddInNative::ClosePort(void)
 			//return return_error(3); //error write com port settings 
 			write_log("", 3, 'e');
 		}
-		//Sleep(100);
 	}
 	CloseHandle(hComm);
 	Sleep(2500);
