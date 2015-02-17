@@ -53,9 +53,16 @@ Temporary Items
 .ilk
 .exp
 .pdb
-1C\InfoBase\1Cv8Log\.*
-1C\InfoBase\1Cv8FTxt\.*
-1C\InfoBase\1Cv8Log\
-1C\InfoBase\1Cv8FTxt\
+/1C/InfoBase/1Cv8Log/*
+/1C/InfoBase/1Cv8FTxt/*
+/1C/InfoBase/1Cv8Log
+/1C/InfoBase/1Cv8FTxt
+/VC/.suo
+/VC/.pdb
+/VC/.ncb
+/VS/build/*
+/VS/build
+
+
 
 
