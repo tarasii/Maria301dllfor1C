@@ -28,7 +28,7 @@ static wchar_t *g_MethodNames[] = {L"OpenPort", L"ClosePort", L"Test",
 		L"Loging", L"CMD"};
 
 static wchar_t *g_PropNamesRu[] = {L"Порт", L"Скорость", L"ПортОткрыт", 
-		L"Комманда", L"Ответ", L"Ошибка",  L"ТекстОшибки", 
+		L"Команда", L"Ответ", L"Ошибка",  L"ТекстОшибки", 
 		L"Версия"};
 static wchar_t *g_MethodNamesRu[] = {L"ОткрытьПорт", L"ЗакрытьПорт", L"Тест",  
 		L"Логирование", L"Команда"};
