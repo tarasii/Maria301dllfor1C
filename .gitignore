@@ -48,7 +48,6 @@ Temporary Items
 *.suo
 *.obj
 *.idb
-*.manifest
 *.pch
 *.ilk
 *.exp
@@ -57,12 +56,13 @@ Temporary Items
 /1C/InfoBase/1Cv8FTxt/*
 /1C/InfoBase/1Cv8Log
 /1C/InfoBase/1Cv8FTxt
-/VC/*.suo
-/VC/*.pdb
-/VC/*.ncb
+/VS/*.suo
+/VS/*.ncb
 /VS/build/*
 /VS/build
-
-
+/VS/bind/*.pdb
+/VS/bind/*.lib
+/VS/bind/*.exp
+/VS/bind/*.ilk
 
 
