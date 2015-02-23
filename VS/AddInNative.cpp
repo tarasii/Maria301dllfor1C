@@ -149,6 +149,7 @@ std::string wstrtostr(const std::wstring &wstr);
 void IpHexToStr(std::wstring& in, std::wstring& out);
 void PortHexToStr(std::wstring& in, std::wstring& out);
 void DelayHexToStr(std::wstring& in, std::wstring& out);
+int subst( char * str, int ln, char * substr, int subln);
 
 //---------------------------------------------------------------------------//
 long GetClassObject(const WCHAR_T* wsName, IComponentBase** pInterface)
@@ -803,7 +804,7 @@ uint8_t CAddInNative::return_error(uint8_t err_no)
 
 uint8_t CAddInNative::send_data(void)
 {
-    char	SMBUFFER[500];
+    char	SMBUFFER[50];
     char	INBUFFER[500];
     char	OUTBUFFER[255];
 	char	TMPBUFFER[50];
@@ -811,11 +812,16 @@ uint8_t CAddInNative::send_data(void)
     DWORD   bytes_read		 = 0;
     DWORD   total_bytes_read = 0;
     DWORD   bytes_written	 = 0;
+	
+	DWORD	ModemStat;
+
 	int		bStatus;
 	uint16_t i,l;
-    char *  pch = 0;
+    //char *  pch = 0;
+    int  pch = 0;
 
 	std::string s;
+	std::size_t fnd;
 
 	m_ans = (L"");
 	m_err = 0;
@@ -846,10 +852,18 @@ uint8_t CAddInNative::send_data(void)
     if (!bStatus ) return return_error(5); //error while data send
 	
 	total_bytes_read = 0;
-	for (i=0;i<600 && !pch;i++){
-		Sleep(10);
+	for (i=0;i<20 && !pch;i++){
+	//for (i=0;i<50 && (fnd == std::string::npos);i++){
+		Sleep(2);
+		
+		GetCommModemStatus(hComm, &ModemStat);
+		if ((ModemStat && MS_CTS_ON)==0)
+		{
+			return return_error(6);
+		}
+
 		bytes_read = 0;
-		bStatus = ReadFile(hComm, &SMBUFFER, 500, &bytes_read, NULL);
+		bStatus = ReadFile(hComm, &SMBUFFER, 50, &bytes_read, NULL);
 		
 		if (!bStatus) return return_error(6); //error while data recieve
 		
@@ -858,15 +872,19 @@ uint8_t CAddInNative::send_data(void)
 			memcpy(INBUFFER+total_bytes_read, SMBUFFER, bytes_read);
 			total_bytes_read += bytes_read;
 			INBUFFER[total_bytes_read] = 0;
-			pch = strstr(INBUFFER, "READY");
+			//pch = strstr(INBUFFER, "READY");
+			pch = subst(INBUFFER, total_bytes_read, "READY", 5);
+			//s = INBUFFER;
+			//s.resize(total_bytes_read);
+			//fnd = s.find("READY");
 
-			//if (m_loging) 
-			//{
-			//	sprintf(TMPBUFFER,"%4d %4d %4d", i, bytes_read, total_bytes_read);
-			//	write_log(TMPBUFFER, 14, 'w');
-			//	write_log(SMBUFFER, bytes_read, 'z');
-			//}
 		}
+		//if (m_loging) 
+		//{
+		//	sprintf(TMPBUFFER,"%4d %4d %4d %d ZZ", i, bytes_read, total_bytes_read, pch);
+		//	write_log(TMPBUFFER, 35, 'w');
+		//	write_log(SMBUFFER, bytes_read, 'z');
+		//}
 	}
 
 	if (total_bytes_read == 0) 
@@ -892,7 +910,7 @@ uint8_t CAddInNative::send_data(void)
 		write_log(INBUFFER, total_bytes_read, 'a');
 	}
 
-	std::size_t fnd;
+	fnd = std::string::npos;
 	//for (i=58;i>=0;i--) //так виснет - полтергейст
 	//for (i=0;i<60;i++) //так работает
 	for (i=58;i>0;i--)
@@ -1289,3 +1307,22 @@ void PortHexToStr(std::wstring& in, std::wstring& out)
 	wsprintf(wc, L"%d",tmp[0]+tmp[1]*256);
 	out = wc;
 }
+
+int subst( char * str, int ln, char * substr, int subln)
+{
+	int i,j;
+	int ret = 0;
+	for(i=0; i<(ln-subln); i++)
+	{
+		if ( *(str+i) == *substr )
+		{
+			ret = i;
+			for(j=1; j<subln; j++)
+			{
+				if ( *(str+i+j) != *(substr+j) ) ret = 0;
+			}
+		}
+	}
+	return ret;
+}
+

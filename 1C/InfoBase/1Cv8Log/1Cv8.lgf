@@ -13,4 +13,5 @@
 {4,"_$InfoBase$_.ConfigUpdate",3},
 {4,"_$InfoBase$_.DBConfigUpdate",4},
 {4,"_$Session$_.Finish",5},
-{3,"1CV8C",2}
+{3,"1CV8C",2},
+{4,"_$PerformError$_",6}
