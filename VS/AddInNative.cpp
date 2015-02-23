@@ -854,7 +854,7 @@ uint8_t CAddInNative::send_data(void)
 	total_bytes_read = 0;
 	for (i=0;i<20 && !pch;i++){
 	//for (i=0;i<50 && (fnd == std::string::npos);i++){
-		Sleep(2);
+		//Sleep(2);
 		
 		GetCommModemStatus(hComm, &ModemStat);
 		if ((ModemStat && MS_CTS_ON)==0)
@@ -1075,7 +1075,7 @@ uint8_t CAddInNative::OpenPort(void)
 	pch = 0;
 	total_bytes_read = 0;
 	for (i=0;i<10 && !pch;i++){
-		Sleep(10);
+		//Sleep(10);
 		bytes_read = 0;
 		bStatus = ReadFile(hComm, &SMBUFFER, 500, &bytes_read, NULL);
 		
