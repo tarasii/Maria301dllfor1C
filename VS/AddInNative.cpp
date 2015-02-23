@@ -985,7 +985,7 @@ uint8_t CAddInNative::OpenPort(void)
 	}
 	
 	memset(&timeouts,0,sizeof(timeouts));
-    timeouts.ReadTotalTimeoutConstant    = 100;
+    timeouts.ReadTotalTimeoutConstant    = 10;
     timeouts.WriteTotalTimeoutConstant   = 100;
     timeouts.ReadIntervalTimeout         = 0; 
     timeouts.ReadTotalTimeoutMultiplier  = 0; 
