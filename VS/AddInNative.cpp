@@ -852,15 +852,15 @@ uint8_t CAddInNative::send_data(void)
     if (!bStatus ) return return_error(5); //error while data send
 	
 	total_bytes_read = 0;
-	for (i=0;i<20 && !pch;i++){
+	for (i=0; i<500 && !pch; i++){
 	//for (i=0;i<50 && (fnd == std::string::npos);i++){
-		//Sleep(2);
+		Sleep(2);
 		
-		GetCommModemStatus(hComm, &ModemStat);
-		if ((ModemStat && MS_CTS_ON)==0)
-		{
-			return return_error(6);
-		}
+		//GetCommModemStatus(hComm, &ModemStat);
+		//if ((ModemStat && MS_CTS_ON)==0)
+		//{
+		//	return return_error(6);
+		//}
 
 		bytes_read = 0;
 		bStatus = ReadFile(hComm, &SMBUFFER, 50, &bytes_read, NULL);
@@ -1018,9 +1018,9 @@ uint8_t CAddInNative::OpenPort(void)
 	
 	total_bytes_read = 0;
 	for (i=0; i<20 && !pch; i++){
-		Sleep(10);
+		Sleep(2);
 		bytes_read = 0;
-		bStatus = ReadFile(hComm, &SMBUFFER, 500, &bytes_read, NULL);
+		bStatus = ReadFile(hComm, &SMBUFFER, 10, &bytes_read, NULL);
 		if (!bStatus)
 		{
 			CAddInNative::ClosePort();
@@ -1074,10 +1074,10 @@ uint8_t CAddInNative::OpenPort(void)
 	
 	pch = 0;
 	total_bytes_read = 0;
-	for (i=0;i<10 && !pch;i++){
-		//Sleep(10);
+	for (i=0; i<10 && !pch; i++){
+		Sleep(2);
 		bytes_read = 0;
-		bStatus = ReadFile(hComm, &SMBUFFER, 500, &bytes_read, NULL);
+		bStatus = ReadFile(hComm, &SMBUFFER, 10, &bytes_read, NULL);
 		
 		if (!bStatus) 
 		{
