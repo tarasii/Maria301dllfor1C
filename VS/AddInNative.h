@@ -32,6 +32,7 @@ public:
 		eMethTest,
 		eMethLoging,
 		eMethCMD,
+		eMethSetCnt,
         eMethLast      // Always last
     };
 
@@ -89,6 +90,7 @@ private:
     uint8_t             m_port;
     uint8_t             m_err;
 	uint32_t            m_baud;
+	uint32_t            m_cnt;
     bool                m_isOpen;
 	bool				m_loging;
 

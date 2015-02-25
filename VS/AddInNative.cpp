@@ -25,13 +25,13 @@ static wchar_t *g_PropNames[] = {L"Port", L"Baud", L"IsOpen",
 		L"LastCmd", L"LastAnswer", L"LastError", L"LastTextError", 
 		L"Version"};
 static wchar_t *g_MethodNames[] = {L"OpenPort", L"ClosePort", L"Test", 
-		L"Loging", L"CMD"};
+		L"Loging", L"CMD", L"SetCnt"};
 
 static wchar_t *g_PropNamesRu[] = {L"Порт", L"Скорость", L"ПортОткрыт", 
 		L"Команда", L"Ответ", L"Ошибка",  L"ТекстОшибки", 
 		L"Версия"};
 static wchar_t *g_MethodNamesRu[] = {L"ОткрытьПорт", L"ЗакрытьПорт", L"Тест",  
-		L"Логирование", L"Команда"};
+		L"Логирование", L"Команда", L"КоличествоОпросов"};
 
 static wchar_t *maria_Errors[] = {
 		L"HARDPAPER",  L"HARDSENSOR", L"HARDPOINT",  L"HARDTXD",    L"HARDTIMER", 
@@ -208,6 +208,7 @@ bool CAddInNative::Init(void* pConnection)
     m_iConnect = (IAddInDefBase*)pConnection;
 	m_isOpen = false;
 	m_loging = false;
+	m_cnt = 200;
     return m_iConnect != NULL;
 }
 //---------------------------------------------------------------------------//
@@ -465,6 +466,7 @@ long CAddInNative::GetNParams(const long lMethodNum)
 	case eMethOpenPort:
         return 2;
 	case eMethCMD:
+	case eMethSetCnt:
         return 1;
 	default:
         return 0;
@@ -504,6 +506,7 @@ bool CAddInNative::GetParamDefValue(const long lMethodNum, const long lParamNum,
 			return false;
 		}
 	case eMethTest:
+	case eMethSetCnt:
        // There are no parameter values by default 
         break;
     default:
@@ -539,6 +542,9 @@ bool CAddInNative::CallAsProc(const long lMethodNum,
         break;
 	case eMethLoging:
 		if (!m_isOpen) m_loging = !m_loging;
+        break;
+	case eMethSetCnt:
+		m_cnt = TV_UI4(paParams);
         break;
     default:
         return false;
@@ -818,7 +824,9 @@ uint8_t CAddInNative::send_data(void)
 	int		bStatus;
 	uint16_t i,l;
     //char *  pch = 0;
-    int  pch = 0;
+    int pch = 0;
+    int pcw = 0;
+	int cnt = m_cnt;
 
 	std::string s;
 	std::size_t fnd;
@@ -852,9 +860,8 @@ uint8_t CAddInNative::send_data(void)
     if (!bStatus ) return return_error(5); //error while data send
 	
 	total_bytes_read = 0;
-	for (i=0; i<500 && !pch; i++){
-	//for (i=0;i<50 && (fnd == std::string::npos);i++){
-		Sleep(2);
+	for (i=0; i<cnt && !pch; i++){
+		//Sleep(2);
 		
 		//GetCommModemStatus(hComm, &ModemStat);
 		//if ((ModemStat && MS_CTS_ON)==0)
@@ -874,6 +881,10 @@ uint8_t CAddInNative::send_data(void)
 			INBUFFER[total_bytes_read] = 0;
 			//pch = strstr(INBUFFER, "READY");
 			pch = subst(INBUFFER, total_bytes_read, "READY", 5);
+
+			pcw = subst(INBUFFER, total_bytes_read, "WRK", 5);
+			if (pcw>0) cnt = cnt + m_cnt;
+
 			//s = INBUFFER;
 			//s.resize(total_bytes_read);
 			//fnd = s.find("READY");
@@ -1017,8 +1028,8 @@ uint8_t CAddInNative::OpenPort(void)
 	Sleep(50);
 	
 	total_bytes_read = 0;
-	for (i=0; i<20 && !pch; i++){
-		Sleep(2);
+	for (i=0; i<m_cnt && !pch; i++){
+		//Sleep(2);
 		bytes_read = 0;
 		bStatus = ReadFile(hComm, &SMBUFFER, 10, &bytes_read, NULL);
 		if (!bStatus)
@@ -1074,8 +1085,8 @@ uint8_t CAddInNative::OpenPort(void)
 	
 	pch = 0;
 	total_bytes_read = 0;
-	for (i=0; i<10 && !pch; i++){
-		Sleep(2);
+	for (i=0; i<100 && !pch; i++){
+		//Sleep(2);
 		bytes_read = 0;
 		bStatus = ReadFile(hComm, &SMBUFFER, 10, &bytes_read, NULL);
 		
