@@ -819,13 +819,12 @@ uint8_t CAddInNative::send_data(void)
     DWORD   total_bytes_read = 0;
     DWORD   bytes_written	 = 0;
 	
-	DWORD	ModemStat;
-
 	int		bStatus;
 	uint16_t i,l;
     //char *  pch = 0;
     int pch = 0;
     int pcw = 0;
+    int tmppcw = -1;
 	int cnt = m_cnt;
 
 	std::string s;
@@ -882,8 +881,12 @@ uint8_t CAddInNative::send_data(void)
 			//pch = strstr(INBUFFER, "READY");
 			pch = subst(INBUFFER, total_bytes_read, "READY", 5);
 
-			pcw = subst(INBUFFER, total_bytes_read, "WRK", 5);
-			if (pcw>0) cnt = cnt + m_cnt;
+			pcw = subst(INBUFFER, total_bytes_read, "WRK", 3);
+			if (pcw>0 && pcw!=tmppcw) 
+			{
+				cnt = cnt + m_cnt;
+				tmppcw = pcw;
+			}
 
 			//s = INBUFFER;
 			//s.resize(total_bytes_read);
