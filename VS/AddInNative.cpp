@@ -957,7 +957,8 @@ uint8_t CAddInNative::OpenPort(void)
 	int		bStatus;
 	DWORD	dwStatus;
 	TCHAR	cmdU = 'U';
-    char *  pch = 0;
+    //char *  pch = 0;
+	int		pch = 0;
 	int		i,l;
 
 	std::string s;
@@ -1044,7 +1045,8 @@ uint8_t CAddInNative::OpenPort(void)
 			memcpy(INBUFFER + total_bytes_read, SMBUFFER, bytes_read);
 			total_bytes_read = total_bytes_read+bytes_read;
 			INBUFFER[total_bytes_read] = 0;
-			pch = strstr(INBUFFER, "READY");
+			//pch = strstr(INBUFFER, "READY");
+			pch = subst(INBUFFER, total_bytes_read, "READY", 5);
 		}
 	}
 	Sleep(20);
@@ -1088,7 +1090,7 @@ uint8_t CAddInNative::OpenPort(void)
 	
 	pch = 0;
 	total_bytes_read = 0;
-	for (i=0; i<100 && !pch; i++){
+	for (i=0; i<m_cnt && !pch; i++){
 		//Sleep(2);
 		bytes_read = 0;
 		bStatus = ReadFile(hComm, &SMBUFFER, 10, &bytes_read, NULL);
@@ -1104,7 +1106,8 @@ uint8_t CAddInNative::OpenPort(void)
 			memcpy(INBUFFER+total_bytes_read, SMBUFFER, bytes_read);
 			total_bytes_read += bytes_read;
 			INBUFFER[total_bytes_read] = 0;
-			pch = strstr(INBUFFER, "READY");
+			//pch = strstr(INBUFFER, "READY");
+			pch = subst(INBUFFER, total_bytes_read, "READY", 5);
 
 		}
 	}
