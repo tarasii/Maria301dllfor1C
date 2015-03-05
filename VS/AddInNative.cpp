@@ -209,6 +209,7 @@ bool CAddInNative::Init(void* pConnection)
 	m_isOpen = false;
 	m_loging = false;
 	m_cnt = 200;
+	m_err = 0;
     return m_iConnect != NULL;
 }
 //---------------------------------------------------------------------------//
@@ -960,6 +961,9 @@ uint8_t CAddInNative::OpenPort(void)
     //char *  pch = 0;
 	int		pch = 0;
 	int		i,l;
+    int pcw = 0;
+    int tmppcw = -1;
+	int cnt = m_cnt;
 
 	std::string s;
 
@@ -1032,7 +1036,7 @@ uint8_t CAddInNative::OpenPort(void)
 	Sleep(50);
 	
 	total_bytes_read = 0;
-	for (i=0; i<m_cnt && !pch; i++){
+	for (i=0; i<cnt && !pch; i++){
 		//Sleep(2);
 		bytes_read = 0;
 		bStatus = ReadFile(hComm, &SMBUFFER, 10, &bytes_read, NULL);
@@ -1047,6 +1051,13 @@ uint8_t CAddInNative::OpenPort(void)
 			INBUFFER[total_bytes_read] = 0;
 			//pch = strstr(INBUFFER, "READY");
 			pch = subst(INBUFFER, total_bytes_read, "READY", 5);
+
+			pcw = subst(INBUFFER, total_bytes_read, "WRK", 3);
+			if (pcw>0 && pcw!=tmppcw) 
+			{
+				cnt = cnt + m_cnt;
+				tmppcw = pcw;
+			}
 		}
 	}
 	Sleep(20);
@@ -1090,7 +1101,7 @@ uint8_t CAddInNative::OpenPort(void)
 	
 	pch = 0;
 	total_bytes_read = 0;
-	for (i=0; i<m_cnt && !pch; i++){
+	for (i=0; i<cnt && !pch; i++){
 		//Sleep(2);
 		bytes_read = 0;
 		bStatus = ReadFile(hComm, &SMBUFFER, 10, &bytes_read, NULL);
@@ -1108,6 +1119,13 @@ uint8_t CAddInNative::OpenPort(void)
 			INBUFFER[total_bytes_read] = 0;
 			//pch = strstr(INBUFFER, "READY");
 			pch = subst(INBUFFER, total_bytes_read, "READY", 5);
+
+			pcw = subst(INBUFFER, total_bytes_read, "WRK", 3);
+			if (pcw>0 && pcw!=tmppcw) 
+			{
+				cnt = cnt + m_cnt;
+				tmppcw = pcw;
+			}
 
 		}
 	}
