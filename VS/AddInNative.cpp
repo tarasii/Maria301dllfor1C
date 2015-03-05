@@ -19,7 +19,7 @@
 
 #define BASE_ERRNO     7
 
-static wchar_t *curver = L"2.1.0";
+static wchar_t *curver = L"2.2.0";
 
 static wchar_t *g_PropNames[] = {L"Port", L"Baud", L"IsOpen", 
 		L"LastCmd", L"LastAnswer", L"LastError", L"LastTextError", 
@@ -64,6 +64,7 @@ static wchar_t *maria_Text_Errors[] = {L"Нет ошибки",
 		L"Нет ответа от устройства",
 		L"Ошибка перекодировки строки",
 		L"Слишком длинная комманда",
+		L"Превышен интервал ожидания ответа",
 		L"Отсутствует чековая или/и контрольная лента", //HARDPAPER 
 		L"Недопустимый температурный режим печатающей головки", 
 		L"Отсутствует напряжение питания нагревательных элементов печатающей головки",  
@@ -208,7 +209,7 @@ bool CAddInNative::Init(void* pConnection)
     m_iConnect = (IAddInDefBase*)pConnection;
 	m_isOpen = false;
 	m_loging = false;
-	m_cnt = 200;
+	m_cnt = 300;
 	m_err = 0;
     return m_iConnect != NULL;
 }
@@ -902,17 +903,7 @@ uint8_t CAddInNative::send_data(void)
 		//}
 	}
 
-	if (total_bytes_read == 0) 
-	{
-		if (m_loging) 
-		{
-			sprintf(TMPBUFFER,"%4d %4d", i, total_bytes_read);
-			write_log(TMPBUFFER, 9, 't');
-		}
-		return return_error(7); //no answer from maria
-	}
-
-	Sleep(10);
+	//Sleep(10);
 
 	s = INBUFFER;
 	s.resize(total_bytes_read);
@@ -920,24 +911,37 @@ uint8_t CAddInNative::send_data(void)
 
 	if (m_loging) 
 	{
-		sprintf(TMPBUFFER,"%4d %4d", i, total_bytes_read);
-		write_log(TMPBUFFER, 9, 't');
-		write_log(INBUFFER, total_bytes_read, 'a');
+		sprintf(TMPBUFFER,"%4d %4d %4d", i, total_bytes_read, cnt);
+		write_log(TMPBUFFER, 14, 't');
+		if (total_bytes_read > 0) 
+		{
+			write_log(INBUFFER, total_bytes_read, 'a');
+		}
+	}
+
+	if (pch == 0) 
+	{
+		return return_error(10); //no ready from maria
+	}
+
+	if (total_bytes_read == 0) 
+	{
+		return return_error(7); //no answer from maria
 	}
 
 	fnd = std::string::npos;
 	//for (i=58;i>=0;i--) //так виснет - полтергейст
 	//for (i=0;i<60;i++) //так работает
-	for (i=58;i>0;i--)
+	for (i=59;i>0;i--)
 	{
 		fnd = m_ans.find(maria_Errors[i]);
-		if (fnd != std::string::npos) return return_error(i+10);
+		if (fnd != std::string::npos) return return_error(i+11);
 	}
 	
 	fnd = m_ans.find(maria_Errors[0]); //кармический баг
-	if (fnd != std::string::npos) return return_error(10);
+	if (fnd != std::string::npos) return return_error(11);
 	fnd = m_ans.find(maria_Errors[23]); //в положение z
-	if (fnd != std::string::npos) return return_error(33);
+	if (fnd != std::string::npos) return return_error(34);
 
 	return 0;
 }
@@ -1015,6 +1019,15 @@ uint8_t CAddInNative::OpenPort(void)
 		CAddInNative::ClosePort();
 		return return_error(4); //error seting com port timeouts
 	}
+
+
+
+	if (m_loging) 
+	{
+		sprintf(TMPBUFFER,"====== %s ======", wstrtostr(curver).c_str());
+		write_log(TMPBUFFER, 19, 'u');
+	}
+
 	//cmdU = (char)253;
 	Sleep(200);
 
@@ -1061,20 +1074,8 @@ uint8_t CAddInNative::OpenPort(void)
 		}
 	}
 	Sleep(20);
-
-	if (total_bytes_read == 0)
-    {
-		if (m_loging) 
-		{
-			sprintf(TMPBUFFER,"%4d %4d", i, total_bytes_read);
-			write_log(TMPBUFFER, 9, 't');
-		}
-		CAddInNative::ClosePort();
-		return return_error(7); //no answer from maria
-    }
 	
 	s = INBUFFER;
-
 	s.resize(total_bytes_read);
 	m_ans = strtowstr(s);
 
@@ -1082,7 +1083,22 @@ uint8_t CAddInNative::OpenPort(void)
 	{
 		sprintf(TMPBUFFER,"%4d %4d", i, total_bytes_read);
 		write_log(TMPBUFFER, 9, 't');
-		write_log(INBUFFER, total_bytes_read, 'u');
+		if (total_bytes_read > 0)
+		{
+			write_log(INBUFFER, total_bytes_read, 'u');
+		}
+	}
+
+	if (pch == 0) 
+	{
+	 	CAddInNative::ClosePort();
+		return return_error(10); //no ready from maria
+	}
+
+	if (total_bytes_read == 0) 
+	{
+	 	CAddInNative::ClosePort();
+		return return_error(7); //no answer from maria
 	}
 
 	m_cmd = (L"SYNC");
@@ -1121,7 +1137,7 @@ uint8_t CAddInNative::OpenPort(void)
 			pch = subst(INBUFFER, total_bytes_read, "READY", 5);
 
 			pcw = subst(INBUFFER, total_bytes_read, "WRK", 3);
-			if (pcw>0 && pcw!=tmppcw) 
+			if (pcw>0 && pcw>tmppcw) 
 			{
 				cnt = cnt + m_cnt;
 				tmppcw = pcw;
@@ -1130,29 +1146,33 @@ uint8_t CAddInNative::OpenPort(void)
 		}
 	}
 
-	if (total_bytes_read == 0) 
-	{
-		if (m_loging) 
-		{
-			sprintf(TMPBUFFER,"%4d %4d", i, total_bytes_read);
-			write_log(TMPBUFFER, 9, 't');
-		}
-	 	CAddInNative::ClosePort();
-		return return_error(7); //no answer from maria
-	}
-
 	s = INBUFFER;
 	s.resize(total_bytes_read);
 	m_ans = strtowstr(s);
 
 	if (m_loging) 
 	{
-		sprintf(TMPBUFFER,"%4d %4d", i, total_bytes_read);
-		write_log(TMPBUFFER, 9, 't');
-		write_log(INBUFFER, total_bytes_read, 'a');
+		sprintf(TMPBUFFER,"%4d %4d %4d", i, total_bytes_read, cnt);
+		write_log(TMPBUFFER, 14, 't');
+		if (total_bytes_read > 0)
+		{
+			write_log(INBUFFER, total_bytes_read, 'a');
+		}
 	}
 
-	Sleep(10);
+	if (pch == 0) 
+	{
+	 	CAddInNative::ClosePort();
+		return return_error(10); //no ready from maria
+	}
+
+	if (total_bytes_read == 0) 
+	{
+	 	CAddInNative::ClosePort();
+		return return_error(7); //no answer from maria
+	}
+
+	//Sleep(10);
 
 	//std::size_t fnd;
 	//for (i=0;i<59;i++)
