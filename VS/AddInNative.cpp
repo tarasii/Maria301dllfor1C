@@ -1203,7 +1203,7 @@ void CAddInNative::ClosePort(void)
 		}
 	}
 	CloseHandle(hComm);
-	Sleep(2500);
+	Sleep(m_cnt);
 	m_isOpen = false;
 	if (m_loging) CloseHandle(hTempFile);
 	return;
