@@ -52,6 +52,7 @@ Temporary Items
 *.ilk
 *.exp
 *.pdb
+*.user
 /1C/InfoBase/1Cv8Log/*
 /1C/InfoBase/1Cv8Log/*.lgp
 /1C/InfoBase/1Cv8Log/*.lgf
