@@ -22,6 +22,7 @@ public:
     	ePropLastError,
     	ePropLastErrorText,
 		ePropVersion,
+		ePropErrorNumber,
 		ePropLast      // Always last
     };
 
@@ -33,6 +34,8 @@ public:
 		eMethLoging,
 		eMethCMD,
 		eMethSetCnt,
+		eMethGetError,
+		eMethGetErrorText,
         eMethLast      // Always last
     };
 
@@ -89,6 +92,7 @@ private:
 
     uint8_t             m_port;
     uint8_t             m_err;
+    uint8_t             m_err_cnt;
 	uint32_t            m_baud;
 	int					m_cnt;
     bool                m_isOpen;
