@@ -19,7 +19,7 @@
 
 #define BASE_ERRNO     7
 
-static wchar_t *curver = L"2.2.0";
+static wchar_t *curver = L"2.3.0";
 
 static wchar_t *g_PropNames[] = {L"Port", L"Baud", L"IsOpen", 
 		L"LastCmd", L"LastAnswer", L"LastError", L"LastTextError", 
@@ -998,15 +998,9 @@ uint8_t CAddInNative::send_data(void)
 	//for (i=59;i>0;i--)
 	for (j = 0; j < 67; j++) 
 	{
-		//fnd = m_ans.find(maria_Errors[i]);
-		//if (fnd != std::string::npos) return return_error(i+11);
 		l = wcslen(maria_Errors[j]);
-		//fnd = wcstombs(TMPBUFFER, maria_Errors[i], l);
 		sprintf(TMPBUFFER,"%ws", maria_Errors[j]);
-		//write_log(TMPBUFFER, l, 'z');
 		pch = subst(INBUFFER, total_bytes_read, TMPBUFFER, l);
-		//sprintf(TMPBUFFER,"%4d %4d", pch, l);
-		//write_log(TMPBUFFER, 9, 'h');
 		if (pch > 0)
 		{
 			err_arr[m_err_cnt] = j+11;
@@ -1016,11 +1010,6 @@ uint8_t CAddInNative::send_data(void)
 
 	if (m_err_cnt>0) return return_error(err_arr[0]);
 	
-	//fnd = m_ans.find(maria_Errors[0]); //кармический баг
-	//if (fnd != std::string::npos) return return_error(11);
-	//fnd = m_ans.find(maria_Errors[23]); //в положение z
-	//if (fnd != std::string::npos) return return_error(34);
-
 	return 0;
 }
 
@@ -1279,9 +1268,9 @@ void CAddInNative::ClosePort(void)
 			//return return_error(3); //error write com port settings 
 			write_log("", 3, 'e');
 		}
+		CloseHandle(hComm);
+		Sleep(m_cnt);
 	}
-	CloseHandle(hComm);
-	Sleep(m_cnt);
 	m_isOpen = false;
 	if (m_loging) CloseHandle(hTempFile);
 	return;
